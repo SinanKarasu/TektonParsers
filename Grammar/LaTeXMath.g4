@@ -3,10 +3,12 @@ grammar LaTeXMath;
 // entry
 prog  : expr EOF ;
 
-// precedence: +,-  >  implicit/*·×/  >  ^  >  postfix(scripts)  >  primary
+// precedence (lowest -> highest):
+// +,-  ;  multiplication/implicit  ;  unary sign  ;  ^  ;  postfix(scripts)  ;  primary
 expr      : addExpr ;
 addExpr   : mulExpr (('+'|'-') mulExpr)* ;
-mulExpr   : powExpr ((MULOP? powExpr))* ;           // MULOP optional ≈ implicit mult
+mulExpr   : unaryExpr ((MULOP? unaryExpr))* ;       // MULOP optional ≈ implicit mult
+unaryExpr : ('+'|'-') unaryExpr | powExpr ;
 powExpr   : postfix ( '^' powExpr )? ;              // right-assoc
 postfix   : primary scripts? ;                      // x^i_j or x_j^i (either order)
 
@@ -51,13 +53,13 @@ CMD_RIGHT   : '\\right' -> skip ;
 CMD_TIMES   : '\\times' ;
 CMD_DOT     : '\\cdot' ;
 
-// generic control word (functions like \sin, \cos, \Gamma etc.)
-CMD_FUNC    : '\\' [a-zA-Z]+ ;
-
-// treat common greek/control words as a single token too (easy to extend)
+// greek/control words must come before CMD_FUNC to win same-length matches.
 CMD_GREEK   : '\\' ('alpha'|'beta'|'gamma'|'Gamma'|'delta'|'Delta'|'epsilon'|'zeta'|'eta'|'theta'|'Theta'
                   |'iota'|'kappa'|'lambda'|'Lambda'|'mu'|'nu'|'xi'|'Xi'|'pi'|'Pi'|'rho'|'sigma'|'Sigma'
                   |'tau'|'upsilon'|'Upsilon'|'phi'|'Phi'|'chi'|'psi'|'Psi'|'omega'|'Omega') ;
+
+// generic control word (functions like \sin, \cos, \Gamma etc.)
+CMD_FUNC    : '\\' [a-zA-Z]+ ;
 
 MULOP       : '*' | '/' | CMD_DOT | CMD_TIMES ;
 
@@ -68,4 +70,3 @@ WS          : [ \t\r\n]+ -> skip ;
 
 // allow LaTeX spacing commands to be ignored if they sneak in
 SPCMD       : ('\\,' | '\\;' | '\\!' | '\\:') -> skip ;
-
