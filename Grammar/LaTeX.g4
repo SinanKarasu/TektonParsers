@@ -305,4 +305,4 @@ subexpr: UNDERSCORE (atom | L_BRACE expr R_BRACE);
 supexpr: CARET (atom | L_BRACE expr R_BRACE);
 
 subeq: UNDERSCORE L_BRACE equality R_BRACE;
-supeq: UNDERSCORE L_BRACE equality R_BRACE;
+supeq: CARET L_BRACE equality R_BRACE;
